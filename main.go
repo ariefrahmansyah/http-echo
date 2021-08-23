@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -19,10 +19,10 @@ func main() {
 	app.Get("/*", echo)
 	app.Post("/*", echo)
 
-	app.Listen(port)
+	app.Listen(":" + port)
 }
 
-func echo(c *fiber.Ctx) {
+func echo(c *fiber.Ctx) error {
 	delay := c.Query("delay")
 	if delay == "" {
 		delay = "0ms"
@@ -30,17 +30,19 @@ func echo(c *fiber.Ctx) {
 
 	delayDuration, err := time.ParseDuration(delay)
 	if err != nil {
-		c.Status(http.StatusBadRequest).Send(err)
-		return
+		c.Status(http.StatusBadRequest).SendString(err.Error())
+		return err
 	}
 
 	time.Sleep(delayDuration)
 
 	body := c.Query("message")
 	if c.Method() == "POST" {
-		body = c.Body()
+		body = string(c.Body())
 	}
 
 	c.Set("Content-Type", c.Get("Content-Type"))
-	c.Send(body)
+	c.SendString(body)
+
+	return nil
 }
