@@ -2,16 +2,24 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber"
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	app := fiber.New()
-	app.Get("/echo", echo)
-	app.Post("/echo", echo)
-	app.Listen(8080)
+
+	app.Get("/*", echo)
+	app.Post("/*", echo)
+
+	app.Listen(port)
 }
 
 func echo(c *fiber.Ctx) {
